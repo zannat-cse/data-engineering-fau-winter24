@@ -1,0 +1,47 @@
+// Exercise 01
+
+pipeline airportsPipeline {
+
+    aiportExtractor 
+    -> airportTextFileInterpreter
+    -> airportCSVInterpreter 
+    -> airportTableInterpreter
+    -> aiprotLoader;
+
+    block aiportExtractor oftype HttpExtractor {
+
+    // I specified the website URL where the file shall be downloaded from.
+
+    url: "https://opendata.rhein-kreis-neuss.de/api/explore/v2.1/catalog/datasets/rhein-kreis-neuss-flughafen-weltweit/exports/csv?lang=en&timezone=Europe%2FBerlin&use_labels=true&delimiter=%3B";
+  }
+
+  block aiprotLoader oftype SQLiteLoader {
+    table: "airports";
+    file: "./airports.sqlite";
+  }
+
+    block airportCSVInterpreter oftype CSVInterpreter {
+      delimiter: ";";
+  }
+
+    block airportTableInterpreter oftype TableInterpreter {
+    header: true;
+    columns: [
+      "Lfd. Nummer" oftype integer,
+      "Name des Flughafens" oftype text,
+      "Ort" oftype text,
+      "Land" oftype text,
+      "IATA" oftype text,
+      "ICAO" oftype text,
+      "Latitude" oftype decimal,
+      "Longitude" oftype decimal,
+      "Altitude" oftype integer
+    ];
+
+  }
+
+    block airportTextFileInterpreter oftype TextFileInterpreter { }
+
+
+
+}
