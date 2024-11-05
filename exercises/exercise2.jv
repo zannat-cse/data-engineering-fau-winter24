@@ -1,0 +1,67 @@
+// Zannatul Ferdousi
+// Exercise 02
+
+pipeline TreeDatasetPipeline {
+
+    // Workflow
+    TreeDatasetExtractor
+        -> TextsInterpreter
+        -> CsvDataInterpreter
+        -> TableInterpreter
+        -> SQLiteCompleteDataLoader;
+
+    // Extract CSV data from source
+    block TreeDatasetExtractor oftype HttpExtractor {
+        url: "https://opendata.rhein-kreis-neuss.de/api/v2/catalog/datasets/stadt-neuss-herbstpflanzung-2023/exports/csv";
+    }
+
+    // Prepare for CSV parsing
+    block TextsInterpreter oftype TextFileInterpreter { }
+
+    // Interpreting the texts as CSV, specifying a semicolon as the delimiter
+    block CsvDataInterpreter oftype CSVInterpreter {
+        delimiter: ";";  // Define CSV delimiter as a semicolon
+    }
+
+    // Constraints
+    constraint UniqueNameConstraint oftype RegexConstraint {
+        regex: /^Vogelsang/;
+    }
+
+    // Constraint to ensure 'id' follows the format "xx.xxx, yy.yyy"
+    constraint GeoPointsConstraint oftype RegexConstraint {
+        regex: /^\d{1,3}\.\d+,\s*\d{1,3}\.\d+$/;
+    }
+
+
+    // Custom 'stadtteil' with UniqueNameConstraint
+    valuetype DistrictType oftype text {
+        constraints: [ UniqueNameConstraint ];
+    }
+
+    // Custom 'id' with the geopoint format constraint
+    valuetype GeoPointType oftype text {
+        constraints: [ GeoPointsConstraint ];
+    }
+
+    // Interpret CSV data
+    block TableInterpreter oftype TableInterpreter {
+        header: true; 
+
+        // Dropping the 'baumart_deutsch'
+        columns: [
+            "lfd_nr" oftype integer,           
+            "stadtteil" oftype DistrictType,   
+            "standort" oftype text,            
+            "baumart_botanisch" oftype text,   
+            "id" oftype GeoPointType,          
+            "baumfamilie" oftype text          
+        ];
+    }
+
+    // Finale SQLite database as following your guidelines
+    block SQLiteCompleteDataLoader oftype SQLiteLoader {
+        file: "./trees.sqlite";  
+        table: "trees";          
+    }
+}
