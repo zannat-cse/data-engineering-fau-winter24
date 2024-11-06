@@ -20,7 +20,7 @@ This project seeks to analyze water quality data collected from multiple designa
 
 <!-- Describe each datasources you plan to use in a section. Use the prefic "DatasourceX" where X is the id of the datasource. -->
 
-### Datasource1: ExampleSource
+### Datasource1: DATA.gov
 * Metadata URL: https://catalog.data.gov/dataset/water-quality-data-41c5e
 * Data URL: URL: https://ecos.fws.gov/ServCat/DownloadFile/173741?Reference=117348
 * Data Type: CSV
