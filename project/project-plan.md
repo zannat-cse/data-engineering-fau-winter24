@@ -22,7 +22,7 @@ This project aims to analyze traffic incidents involving drivers in Montgomery C
 
 ### Datasource1: Montgomery County, MD, via Data.gov
 * Metadata URL: https://catalog.data.gov/dataset/crash-reporting-drivers-data
-* Data URL: URL: https://catalog.data.gov/dataset/crash-reporting-drivers-data/resource/9851a37f-4f32-464e-8ba6-c23023653a7f
+* Data URL: URL: https://data.montgomerycountymd.gov/api/views/mmzv-x632/rows.csv?accessType=DOWNLOAD
 * Data Type: CSV
 
 This dataset contains detailed information on drivers involved in traffic incidents on county and local roads in Montgomery County, Maryland. It includes data points such as crash date, location, environmental conditions, vehicle type, and driver behavior factors.
