@@ -25,7 +25,7 @@ This project seeks to analyze water quality data collected from multiple designa
 * Data URL: URL: https://ecos.fws.gov/ServCat/DownloadFile/173741?Reference=117348
 * Data Type: CSV
 
-Short description of the DataSource.
+Water quality data collected bi-weekly by volunteers from various locations within a refuge, covering parameters like Turbidity, pH, Dissolved Oxygen (DO), Salinity, and Temperature.
 
 ## Work Packages
 
