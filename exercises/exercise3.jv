@@ -1,0 +1,83 @@
+// Zannatul Ferdousi
+
+pipeline CountryDataAnalyticsPipeline {
+
+  // Download the Excel data file from the World Bank source
+  ExcelDataFetcher
+    -> WorkbookProcessor
+    -> SelectSheet
+    -> ExtractDataRange
+    -> ProcessGDPData
+    -> SaveGDPData;
+
+  // Extract and process bond data separately
+  ExtractDataRange
+    -> ProcessBondData
+    -> SaveBondData;
+
+  // Block to download the Excel file from the provided link
+  block ExcelDataFetcher oftype HttpExtractor {
+    url: "https://thedocs.worldbank.org/en/doc/7d852628d96b9411d43e5d36d5dff941-0050062022/original/Graphs-Chapter-5-02082022.xlsx";
+  }
+
+  // Interpret the Excel file as a workbook
+  block WorkbookProcessor oftype XLSXInterpreter { }
+
+  // Select the sheet named "Figure S5.1.2"
+  block SelectSheet oftype SheetPicker {
+    sheetName: "Figure S5.1.2";
+  }
+
+  // Extract the specified data range (P2 to S45)
+  block ExtractDataRange oftype CellRangeSelector {
+    select: range P2:S45;
+  }
+
+  // Process GDP per Capita data
+  block ProcessGDPData oftype TableInterpreter {
+    header: false;
+    columns: [
+      "Country Code" oftype CountryCodeAlpha3,
+      "GDP per Capita" oftype GDPPositiveDecimal
+    ];
+  }
+
+  // Process Bond Issuance data
+  block ProcessBondData oftype TableInterpreter {
+    header: false;
+    columns: [
+      "Country Code" oftype CountryCodeAlpha3,
+      "Bond Issuance Share" oftype BondPercentage
+    ];
+  }
+
+  // Save the GDP data into SQLite database
+  block SaveGDPData oftype SQLiteLoader {
+    table: "gdpPerCapita";
+    file: "./country-stats.sqlite";
+  }
+
+  // Save the Bond Issuance data into SQLite database
+  block SaveBondData oftype SQLiteLoader {
+    table: "bondIssuancee";
+    file: "./country-stats.sqlite";
+  }
+
+  // Define custom value types with validation constraints
+  valuetype GDPPositiveDecimal oftype decimal {
+    constraints: [PositiveGDPConstraint];
+  }
+
+  constraint PositiveGDPConstraint on decimal: value > 0;
+
+  valuetype BondPercentage oftype decimal {
+    constraints: [BondShareConstraint];
+  }
+
+  constraint BondShareConstraint oftype RangeConstraint {
+    lowerBound: 0;
+    lowerBoundInclusive: true;
+    upperBound: 1;
+    upperBoundInclusive: true;
+  }
+}
