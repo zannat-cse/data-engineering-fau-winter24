@@ -1,83 +1,95 @@
 // Zannatul Ferdousi
 
-pipeline CountryDataAnalyticsPipeline {
+pipeline GlobalEconomicPipeline {
 
-  // Download the Excel data file from the World Bank source
+  // Download the data directly from the provided URL
   ExcelDataFetcher
-    -> WorkbookProcessor
-    -> SelectSheet
-    -> ExtractDataRange
-    -> ProcessGDPData
-    -> SaveGDPData;
-
-  // Extract and process bond data separately
-  ExtractDataRange
-    -> ProcessBondData
+    -> InterpretWorkbook
+    -> SelectDataSheet
+    -> ExtractRelevantRange
+    -> CleanBondData
+    -> InterpretBondData
     -> SaveBondData;
 
-  // Block to download the Excel file from the provided link
+  // Extract and process GDP per Capita data
+  ExtractRelevantRange
+    -> CleanGdpData
+    -> InterpretGdpData
+    -> SaveGdpData;
+
+  // Fetch the Excel file from the given URL
   block ExcelDataFetcher oftype HttpExtractor {
     url: "https://thedocs.worldbank.org/en/doc/7d852628d96b9411d43e5d36d5dff941-0050062022/original/Graphs-Chapter-5-02082022.xlsx";
   }
 
-  // Interpret the Excel file as a workbook
-  block WorkbookProcessor oftype XLSXInterpreter { }
+  // Interpret the file as an Excel workbook
+  block InterpretWorkbook oftype XLSXInterpreter { }
 
   // Select the sheet named "Figure S5.1.2"
-  block SelectSheet oftype SheetPicker {
+  block SelectDataSheet oftype SheetPicker {
     sheetName: "Figure S5.1.2";
   }
 
-  // Extract the specified data range (P2 to S45)
-  block ExtractDataRange oftype CellRangeSelector {
+  // Extract data within the specified range (P2:S45)
+  block ExtractRelevantRange oftype CellRangeSelector {
     select: range P2:S45;
   }
 
-  // Process GDP per Capita data
-  block ProcessGDPData oftype TableInterpreter {
+  // Remove irrelevant columns for Bond Issuance data
+  block CleanBondData oftype ColumnDeleter {
+    delete: [column B, column C];
+  }
+
+  // Remove irrelevant columns for GDP per Capita data
+  block CleanGdpData oftype ColumnDeleter {
+    delete: [column B, column D];
+  }
+
+  // Interpret Bond Issuance data
+  block InterpretBondData oftype TableInterpreter {
     header: false;
     columns: [
       "Country Code" oftype CountryCodeAlpha3,
-      "GDP per Capita" oftype GDPPositiveDecimal
+      "Bond Issuance Share" oftype BondShareDecimal
     ];
   }
 
-  // Process Bond Issuance data
-  block ProcessBondData oftype TableInterpreter {
+  // Interpret GDP per Capita data
+  block InterpretGdpData oftype TableInterpreter {
     header: false;
     columns: [
       "Country Code" oftype CountryCodeAlpha3,
-      "Bond Issuance Share" oftype BondPercentage
+      "GDP per Capita" oftype GdpCapitaDecimal
     ];
   }
 
-  // Save the GDP data into SQLite database
-  block SaveGDPData oftype SQLiteLoader {
-    table: "gdpPerCapita";
-    file: "./country-stats.sqlite";
-  }
-
-  // Save the Bond Issuance data into SQLite database
+  // Load Bond Issuance data into SQLite database
   block SaveBondData oftype SQLiteLoader {
     table: "bondIssuance";
     file: "./country-stats.sqlite";
   }
 
-  // Define custom value types with validation constraints
-  valuetype GDPPositiveDecimal oftype decimal {
-    constraints: [PositiveGDPConstraint];
+  // Load GDP per Capita data into SQLite database
+  block SaveGdpData oftype SQLiteLoader {
+    table: "gdpPerCapita";
+    file: "./country-stats.sqlite";
   }
 
-  constraint PositiveGDPConstraint on decimal: value > 0;
-
-  valuetype BondPercentage oftype decimal {
-    constraints: [BondShareConstraint];
+  // Define custom value types with constraints
+  valuetype BondShareDecimal oftype decimal {
+    constraints: [ValidBondShareRange];
   }
 
-  constraint BondShareConstraint oftype RangeConstraint {
+  constraint ValidBondShareRange oftype RangeConstraint {
     lowerBound: 0;
     lowerBoundInclusive: true;
     upperBound: 1;
     upperBoundInclusive: true;
   }
+
+  valuetype GdpCapitaDecimal oftype decimal {
+    constraints: [PositiveGdpConstraint];
+  }
+
+  constraint PositiveGdpConstraint on decimal: value > 0;
 }
