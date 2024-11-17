@@ -59,7 +59,7 @@ pipeline CountryDataAnalyticsPipeline {
 
   // Save the Bond Issuance data into SQLite database
   block SaveBondData oftype SQLiteLoader {
-    table: "bondIssuancee";
+    table: "bondIssuance";
     file: "./country-stats.sqlite";
   }
 
