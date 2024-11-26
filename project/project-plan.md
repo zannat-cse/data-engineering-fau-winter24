@@ -19,7 +19,7 @@ This project aims to analyze key metrics, including greenhouse gas emissions, la
 <!-- Describe each datasources you plan to use in a section. Use the prefix "DatasourceX" where X is the id of the datasource. -->
 
 ### Datasource1: FAOLEX Dataset on Production Crops Livestock
-* Metadata URL: https://www.fao.org/faolex/opendata/en/
+* Metadata URL: https://www.fao.org/faostat/en/#data/QCL/metadata
 * Data URL: URL: https://bulks-faostat.fao.org/production/Production_Crops_Livestock_E_All_Data.zip
 * Data Type: CSV
 
