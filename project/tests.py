@@ -23,7 +23,7 @@ def test_pipeline_execution():
 def test_faostat_csv_exists():
 
     # test if the FAOSTAT cleaned CSV file is created.
-    print("Testing if FAOSTAT cleaned CSV exists...")
+    print("Testing if FAOSTAT cleaned CSV exists.")
     assert os.path.exists(FAOSTAT_CSV), f"FAOSTAT cleaned CSV file not found: {FAOSTAT_CSV}"
     print("FAOSTAT cleaned CSV exists.")
 
@@ -31,7 +31,7 @@ def test_faostat_csv_exists():
 def test_world_bank_csv_exists():
 
     # Test if the World Bank cleaned CSV file is created.
-    print("Testing if World Bank cleaned CSV exists...")
+    print("Testing if World Bank cleaned CSV exists..")
     assert os.path.exists(WORLD_BANK_CSV), f"World Bank cleaned CSV file not found: {WORLD_BANK_CSV}"
     print("World Bank cleaned CSV exists.")
 
@@ -69,7 +69,7 @@ def test_sqlite_db_exists():
 def test_sqlite_tables():
 
     # test if the expected tables exist in the SQLite database.
-    print("Testing SQLite database tables...")
+    print("Testing SQLite database tables.")
     with sqlite3.connect(SQLITE_DB) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
@@ -103,4 +103,4 @@ if __name__ == "__main__":
     test_sqlite_tables()
     test_sqlite_table_content()
 
-    print("All Test is Done Successfully.")
+    print("All Test is Done Successfully")
