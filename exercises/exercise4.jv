@@ -1,0 +1,107 @@
+// Zannatul Ferdousi
+
+pipeline WeatherDataPipeline {
+
+    // Start the pipeline
+    FetchingZipFile 
+        -> ArchiveExtractor
+        -> CSVFileSelector 
+        -> LoadRawTextData
+        -> CSVInterpret
+        -> BatteryColumnUpdate
+        -> HeadersUpdate
+        -> DataIntegrityChecker
+        -> TemperatureTransformer
+        -> BatteryTemperatureTransformer
+        -> ProcessedFinalDataStore;
+
+    // Download the ZIP archive
+    block FetchingZipFile oftype HttpExtractor {
+        url: "https://www.mowesta.com/data/measure/mowesta-dataset-20221107.zip";
+    }
+
+    // Extrac ZIP file
+    block ArchiveExtractor oftype ArchiveInterpreter {
+        archiveType: "zip";
+    }
+
+    // Identify and select the required CSV file
+    block CSVFileSelector oftype FilePicker {
+        path: "/data.csv";
+    }
+
+    // Read the CSV file as plain text
+    block LoadRawTextData oftype TextFileInterpreter {}
+
+    // Parse the plain text into a structured table
+    block CSVInterpret oftype CSVInterpreter {
+        delimiter: ";"; 
+    }
+   // Rename Headers1
+    block BatteryColumnUpdate oftype CellWriter {
+        at: cell J1; 
+        write: ["battery_temperature"];
+    }
+    // Rename Headers2
+    block HeadersUpdate oftype CellWriter {
+        at: range A1:E1; 
+        write: ["id", "producer", "model", "month", "temperature"];
+    }
+
+    // columns and their data types
+    block DataIntegrityChecker oftype TableInterpreter {
+        header: true;
+        columns: [
+            "id" oftype integer,
+            "producer" oftype text,
+            "model" oftype text,
+            "month" oftype month,
+            "temperature" oftype decimal,
+            "battery_temperature" oftype decimal
+        ];
+    }
+
+    // Celsius to Fahrenheit
+    transform ConvertCelsiusToFahrenheit {
+        from CelsiusValue oftype decimal;
+        to FahrenheitValue oftype decimal;
+
+        FahrenheitValue: 32 + ((CelsiusValue * 9) / 5);
+    }
+
+    // temperature conversion apply
+    block TemperatureTransformer oftype TableTransformer {
+        inputColumns: ["temperature"];
+        outputColumn: "temperature";
+        uses: ConvertCelsiusToFahrenheit;
+    }
+
+    // conversion for battery temperature
+    block BatteryTemperatureTransformer oftype TableTransformer {
+        inputColumns: ["battery_temperature"];
+        outputColumn: "battery_temperature";
+        uses: ConvertCelsiusToFahrenheit;
+    }
+// Month 
+    constraint MonthRange oftype RangeConstraint {
+        lowerBound: 1;
+        lowerBoundInclusive: true;
+        upperBound: 12;
+        upperBoundInclusive: true;
+    }
+
+    valuetype month oftype integer {
+        constraints:[MonthRange];
+    }
+
+
+    // Save the final data sqlite
+    block ProcessedFinalDataStore oftype SQLiteLoader {
+        table: "temperatures";
+        file: "./temperatures.sqlite";
+    }
+
+
+
+
+}
