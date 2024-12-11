@@ -26,6 +26,8 @@ jobs:
           pip install sqlalchemy
           pip install requests
           
-
+      - name: Run Pipeline Script
+        run: bash ./project/pipeline.sh 
+        
       - name: Run Test Script
         run: bash ./project/tests.sh 
