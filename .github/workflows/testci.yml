@@ -13,11 +13,11 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
 
-      # Python version 3.9 installation
-      - name: Set up Python 3.9
+      # python version 3.10 installations
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: 3.10
 
       - name: Install all dependencies
         run: |
@@ -25,38 +25,10 @@ jobs:
           pip install pandas
           pip install sqlalchemy
           pip install requests
+          
 
-      # Debug current working directory
-      - name: Debug current working directory
-        run: |
-          echo "Current working directory:"
-          pwd
 
-      # Debug directory structure
-      - name: Debug directory structure
+      - name: Run tests file
         run: |
-          echo "Directory structure:"
-          ls -R
-
-      # Ensure the `data` directory exists
-      - name: Ensure data directory exists
-        run: |
-          mkdir -p data
-
-      # Run pipeline script
-      - name: Run pipeline script
-        run: |
-          python ./project/pipeline.py
-
-      # Debug directory structure after pipeline
-      - name: Debug directory structure after pipeline
-        run: |
-          echo "Directory structure after running pipeline:"
-          ls -R
-
-      # Run tests
-      - name: Run tests
-        working-directory: ./project
-        run: |
-          chmod +x tests.sh
-          ./tests.sh
+          chmod +x ./project/tests.sh
+          ./project/tests.sh 
