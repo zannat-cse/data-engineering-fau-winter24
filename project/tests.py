@@ -26,7 +26,7 @@ def run_etl_pipeline():
 
 # Function to validate the existence and content of files
 def validate_output_files():
-    print("Validating output files...")
+    print("Validating output files")
 
     # Initialize an empty list for errors
     errors = []
