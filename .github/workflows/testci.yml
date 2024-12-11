@@ -10,25 +10,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Repository code
+      - name: Checkout Repository Code
         uses: actions/checkout@v3
 
-      # installations of python version 3.13
       - name: Set up Python 3.13
         uses: actions/setup-python@v4
         with:
           python-version: 3.13
 
-      - name: Dependencies install
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install sqlalchemy
-          pip install pandas
-          pip install requests
-          
+          pip install sqlalchemy pandas requests
 
+      - name: Set Working Directory for Tests
+        run: |
+          mkdir -p data  # Ensure the `data` directory exists
+          mv ./data-engineering-fau-winter24/data ./  # Move `data` directory to the root level
+          ls -R  # List the directory structure for debugging
+        working-directory: .  # Set root-level directory
 
-      - name: Tests Run
+      - name: Run Tests
         run: |
           chmod +x ./project/tests.sh
-          ./project/tests.sh 
+          ./project/tests.sh
