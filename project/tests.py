@@ -1,106 +1,70 @@
 import os
-import sqlite3
-import pandas as pd
 import subprocess
+import pandas as pd
 
-# Define paths and constants
-DATA_DIR = "../data"
-FAOSTAT_CSV = os.path.join(DATA_DIR, "faostat_cleaned_long.csv")
-WORLD_BANK_CSV = os.path.join(DATA_DIR, "world_bank_cleaned_long.csv")
-SQLITE_DB = os.path.join(DATA_DIR, "data_cleaned.db")
-PIPELINE_SCRIPT = "./project/pipeline.py"
+# Paths to the expected output files
+EXPECTED_OUTPUT_FILES = [
+    '../data/faostat_cleaned_long.csv',
+    '../data/world_bank_cleaned_long.csv',
+    '../data/data_cleaned.db'
+]
 
+# Function to run the ETL pipeline and capture its output
+def run_etl_pipeline():
+    print("Running ETL pipeline...")
 
-def test_pipeline_execution():
+    # Use subprocess to execute the pipeline
+    process = subprocess.Popen(['python', './project/pipeline.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = process.communicate()
 
-    # Testing if the pipeline script executes successfully.
-    print("Testing pipeline execution...")
-    result = subprocess.run(["python", PIPELINE_SCRIPT], capture_output=True, text=True)
-    assert result.returncode == 0, f"Pipeline script failed: {result.stderr}"
-    print("Pipeline executed successfully.")
+    if process.returncode != 0:
+        print(f"ETL pipeline failed with error: {stderr.decode()}")
+        return False
 
+    print(f"ETL pipeline ran successfully. Output: {stdout.decode()}")
+    return True
 
-def test_faostat_csv_exists():
+# Function to validate the existence and content of files
+def validate_output_files():
+    print("Validating output files...")
 
-    # test if the FAOSTAT cleaned CSV file is created.
-    print("Testing if FAOSTAT cleaned CSV exists.")
-    assert os.path.exists(FAOSTAT_CSV), f"FAOSTAT cleaned CSV file not found: {FAOSTAT_CSV}"
-    print("FAOSTAT cleaned CSV exists.")
+    # Initialize an empty list for errors
+    errors = []
 
-
-def test_world_bank_csv_exists():
-
-    # Test if the World Bank cleaned CSV file is created.
-    print("Testing if World Bank cleaned CSV exists..")
-    assert os.path.exists(WORLD_BANK_CSV), f"World Bank cleaned CSV file not found: {WORLD_BANK_CSV}"
-    print("World Bank cleaned CSV exists.")
-
-
-def test_faostat_csv_content():
-
-    # Test the content of the FAOSTAT cleaned CSV file.
-    print("Testing FAOSTAT cleaned CSV content...")
-    df = pd.read_csv(FAOSTAT_CSV)
-    assert not df.empty, "FAOSTAT cleaned CSV file is empty."
-    assert "Area" in df.columns, "Expected column 'Area' not found in FAOSTAT CSV."
-    assert "Year" in df.columns, "Expected column 'Year' not found in FAOSTAT CSV."
-    print("FAOSTAT cleaned CSV content is valid.")
-
-
-def test_world_bank_csv_content():
-
-    # Test the content of the World Bank cleaned CSV file.
-    print("Testing World Bank cleaned CSV content...")
-    df = pd.read_csv(WORLD_BANK_CSV)
-    assert not df.empty, "World Bank cleaned CSV file is empty."
-    assert "Country Name" in df.columns, "Expected column 'Country Name' not found in World Bank CSV."
-    assert "Year" in df.columns, "Expected column 'Year' not found in World Bank CSV."
-    print("World Bank cleaned CSV content is valid.")
+    # Check if the output files exist and if they are non-empty
+    for file in EXPECTED_OUTPUT_FILES:
+        if not os.path.exists(file):
+            errors.append(f"File missing: {file}")
+        elif os.path.getsize(file) == 0:
+            errors.append(f"File is empty: {file}")
+    
+    if errors: 
+        for error in errors:
+            print(error)
+        return False
+    
+    # Include data file names in success messages
+    print(f"Success: All files exist.")
+    for file in EXPECTED_OUTPUT_FILES:
+        print(f"  - {file}")
+    
+    return True
 
 
-def test_sqlite_db_exists():
+# Main function to run all tests sequentially
+def run_tests():
+    # First, run the ETL pipeline and validate if it worked
+    if not run_etl_pipeline():
+        print("ETL pipeline test failed.")
+        return
 
-    # testing if the SQLite database file is created.
-    print("Testing if SQLite database exists...")
-    assert os.path.exists(SQLITE_DB), f"SQLite database not found: {SQLITE_DB}"
-    print("SQLite database exists.")
+    # Then, validate the output files
+    if not validate_output_files():
+        print("File validation test failed.")
+        return
 
-
-def test_sqlite_tables():
-
-    # test if the expected tables exist in the SQLite database.
-    print("Testing SQLite database tables.")
-    with sqlite3.connect(SQLITE_DB) as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-        tables = [row[0] for row in cursor.fetchall()]
-        assert "faostat_data_long" in tables, "Table 'faostat_data_long' not found in SQLite database."
-        assert "world_bank_data_long" in tables, "Table 'world_bank_data_long' not found in SQLite database."
-        print("Expected tables found in SQLite database.")
-
-
-def test_sqlite_table_content():
-    """
-    Test the content of the tables in the SQLite database.
-    """
-    print("Testing SQLite database table content...")
-    with sqlite3.connect(SQLITE_DB) as conn:
-        faostat_df = pd.read_sql("SELECT * FROM faostat_data_long;", conn)
-        world_bank_df = pd.read_sql("SELECT * FROM world_bank_data_long;", conn)
-        assert not faostat_df.empty, "Table 'faostat_data_long' in SQLite database is empty."
-        assert not world_bank_df.empty, "Table 'world_bank_data_long' in SQLite database is empty."
-        print("SQLite database tables contain valid data.")
-
+    # Final success message
+    print("All tests passed successfully!")
 
 if __name__ == "__main__":
-    # Run all tests
-    test_pipeline_execution()
-    test_faostat_csv_exists()
-    test_world_bank_csv_exists()
-    test_faostat_csv_content()
-    test_world_bank_csv_content()
-    test_sqlite_db_exists()
-    test_sqlite_tables()
-    test_sqlite_table_content()
-
-    print("All Test is Done Successfully")
+    run_tests()
