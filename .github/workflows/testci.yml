@@ -26,35 +26,35 @@ jobs:
           pip install sqlalchemy
           pip install requests
 
-      # Debug: Check the current working directory
+      # Debug current working directory
       - name: Debug current working directory
         run: |
           echo "Current working directory:"
           pwd
 
-      # Debug: Check the directory structure before running pipeline
-      - name: Debug directory structure before pipeline
+      # Debug directory structure
+      - name: Debug directory structure
         run: |
-          echo "Directory structure before running pipeline:"
+          echo "Directory structure:"
           ls -R
 
       # Ensure the `data` directory exists
       - name: Ensure data directory exists
         run: |
-          mkdir -p data  # Pre-create the `data` directory if missing
+          mkdir -p data
 
-      # Run the pipeline script
+      # Run pipeline script
       - name: Run pipeline script
         run: |
           python ./project/pipeline.py
 
-      # Debug: Check the directory structure after pipeline
+      # Debug directory structure after pipeline
       - name: Debug directory structure after pipeline
         run: |
           echo "Directory structure after running pipeline:"
           ls -R
 
-      # Run the tests
+      # Run tests
       - name: Run tests
         working-directory: ./project
         run: |
