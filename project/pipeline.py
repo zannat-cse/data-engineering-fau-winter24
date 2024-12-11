@@ -6,7 +6,7 @@ from io import BytesIO
 import sqlite3
 
 # Define directory and data files
-data_directory = r"..\data"
+data_directory = r"../data"
 os.makedirs(data_directory, exist_ok=True)
 
 # Define URLs for datasets
