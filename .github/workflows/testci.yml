@@ -13,22 +13,31 @@ jobs:
       - name: Checkout Repository Code
         uses: actions/checkout@v3
 
-      - name: Set up Python 3.13
+      - name: Set up Latest Stable Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.13
+          python-version: '3.x'
 
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install sqlalchemy pandas requests
 
-      - name: Set Working Directory for Tests
+      - name: Debug Directory Structure
         run: |
-          mkdir -p data  # Ensure the `data` directory exists
-          mv ./data-engineering-fau-winter24/data ./  # Move `data` directory to the root level
-          ls -R  # List the directory structure for debugging
-        working-directory: .  # Set root-level directory
+          echo "Current directory structure:"
+          ls -R
+
+      - name: Ensure Data Directory Exists
+        run: |
+          if [ ! -d "./data" ]; then
+            echo "Data directory missing. Creating dummy directory for debugging."
+            mkdir -p ./data
+          fi
+
+      - name: Run Pipeline Script
+        run: |
+          python ./project/pipeline.py
 
       - name: Run Tests
         run: |
