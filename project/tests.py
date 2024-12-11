@@ -8,7 +8,7 @@ DATA_DIR = "../data"
 FAOSTAT_CSV = os.path.join(DATA_DIR, "faostat_cleaned_long.csv")
 WORLD_BANK_CSV = os.path.join(DATA_DIR, "world_bank_cleaned_long.csv")
 SQLITE_DB = os.path.join(DATA_DIR, "data_cleaned.db")
-PIPELINE_SCRIPT = "pipeline.py"
+PIPELINE_SCRIPT = "./project/pipeline.py"
 
 
 def test_pipeline_execution():
