@@ -4,10 +4,9 @@ import pandas as pd
 import subprocess
 
 # Define paths and constants
-DATA_DIR = "../data/"
-FAOSTAT_CSV = os.path.join(DATA_DIR, "faostat_cleaned_long.csv")
-WORLD_BANK_CSV = os.path.join(DATA_DIR, "world_bank_cleaned_long.csv")
-SQLITE_DB = os.path.join(DATA_DIR, "data_cleaned.db")
+FAOSTAT_CSV = "../data/faostat_cleaned_long.csv"
+WORLD_BANK_CSV = "../data/world_bank_cleaned_long.csv"
+SQLITE_DB = "../data/data_cleaned.db"
 PIPELINE_SCRIPT = "./project/pipeline.py"
 
 
