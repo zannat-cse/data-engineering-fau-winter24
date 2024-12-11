@@ -24,13 +24,7 @@ jobs:
           pip install sqlalchemy pandas requests
 
       - name: Ensure Data Directory Exists
-        run: |
-          mkdir -p data  # Ensure the `data` directory exists at the root
-
-      - name: Debug Directory Structure Before Pipeline
-        run: |
-          echo "Directory structure before running the pipeline:"
-          ls -R
+        run: mkdir -p data
 
       - name: Run Pipeline Script
         run: |
@@ -40,6 +34,12 @@ jobs:
         run: |
           echo "Directory structure after running the pipeline:"
           ls -R
+
+      - name: Move FAOSTAT Cleaned CSV (If Necessary)
+        run: |
+          if [ -f "./faostat_cleaned_long.csv" ]; then
+            mv ./faostat_cleaned_long.csv ./data/faostat_cleaned_long.csv
+          fi
 
       - name: Run Tests
         run: |
