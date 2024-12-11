@@ -27,8 +27,5 @@ jobs:
           pip install requests
           
 
-
-      - name: Run tests file
-        run: |
-          chmod +x ./project/tests.sh
-          ./project/tests.sh 
+      - name: Run Test Script
+        run: bash ./project/tests.sh 
