@@ -13,11 +13,11 @@ jobs:
       - name: Repository code
         uses: actions/checkout@v3
 
-      # python version 3.9 installations
-      - name: Set up Python 3.9
+      # installations of python version 3.13
+      - name: Set up Python 3.13
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: 3.13
 
       - name: Dependencies install
         run: |
