@@ -1,0 +1,78 @@
+pipeline GTFSDataHandler {
+
+  // Download GTFS data from the specified URL
+  GTFSZipDownloader
+    -> GTFSUnzipHandler
+    -> StopsSelector
+    -> StopsUTF8Decoder
+    -> StopsCSVProcessor
+    -> StopsDataTable
+    -> StopsDBWriter;
+
+  // Block to download the GTFS zip file
+  block GTFSZipDownloader oftype HttpExtractor {
+      url: "https://gtfs.rhoenenergie-bus.de/GTFS.zip"; 
+  }
+
+  // Block to handle ZIP archive
+  block GTFSUnzipHandler oftype ArchiveInterpreter {
+      archiveType: "zip"; 
+  }
+
+  // Block to pick the stops.txt file
+  block StopsSelector oftype FilePicker {
+      path: "./stops.txt"; 
+  }
+
+  // Block to decode stops.txt as UTF-8
+  block StopsUTF8Decoder oftype TextFileInterpreter {
+      encoding: "utf8"; 
+  }
+
+  // Block to parse the stops.txt as a CSV file
+  block StopsCSVProcessor oftype CSVInterpreter {
+      delimiter: ",";
+      enclosing: '"';
+  }
+
+  // Constraints for validation
+  constraint GeoRangeConstraint oftype RangeConstraint {
+      lowerBound: -90;
+      upperBound: 90;
+      lowerBoundInclusive: true;
+      upperBoundInclusive: true;
+  }
+
+  valuetype GeoCoords oftype decimal {
+      constraints: [GeoRangeConstraint]; 
+  }
+
+  constraint ZoneRangeConstraint oftype RangeConstraint {
+      lowerBound: 1925;
+      upperBound: 1925;
+      lowerBoundInclusive: true;
+      upperBoundInclusive: true;
+  }
+
+  valuetype ZoneValue oftype integer {
+      constraints: [ZoneRangeConstraint]; 
+  }
+
+  // Define table structure and drop invalid rows
+  block StopsDataTable oftype TableInterpreter {
+      header: true; 
+      columns: [
+          "stop_id" oftype integer,
+          "stop_name" oftype text,
+          "stop_lat" oftype GeoCoords,
+          "stop_lon" oftype GeoCoords,
+          "zone_id" oftype ZoneValue
+      ]; 
+  }
+
+  // Block to save data into a SQLite database
+  block StopsDBWriter oftype SQLiteLoader {
+      table: "stops"; 
+      file: "gtfs.sqlite"; 
+  }
+}
