@@ -1,6 +1,6 @@
 pipeline GTFSDataHandler {
 
-  // Download GTFS data from the specified URL
+  // Download GTFS data
   GTFSZipDownloader
     -> GTFSUnzipHandler
     -> StopsSelector
@@ -9,7 +9,7 @@ pipeline GTFSDataHandler {
     -> StopsDataTable
     -> StopsDBWriter;
 
-  // Block to download the GTFS zip file
+  //download the GTFS zip file
   block GTFSZipDownloader oftype HttpExtractor {
       url: "https://gtfs.rhoenenergie-bus.de/GTFS.zip"; 
   }
@@ -19,12 +19,12 @@ pipeline GTFSDataHandler {
       archiveType: "zip"; 
   }
 
-  // Block to pick the stops.txt file
+  // pick the stops.txt file
   block StopsSelector oftype FilePicker {
       path: "./stops.txt"; 
   }
 
-  // Block to decode stops.txt as UTF-8
+  //decode stops.txt as UTF-8
   block StopsUTF8Decoder oftype TextFileInterpreter {
       encoding: "utf8"; 
   }
@@ -35,7 +35,7 @@ pipeline GTFSDataHandler {
       enclosing: '"';
   }
 
-  // Constraints for validation
+  // Constraint for validation
   constraint GeoRangeConstraint oftype RangeConstraint {
       lowerBound: -90;
       upperBound: 90;
@@ -70,7 +70,7 @@ pipeline GTFSDataHandler {
       ]; 
   }
 
-  // Block to save data into a SQLite database
+  //save data into a SQLite database
   block StopsDBWriter oftype SQLiteLoader {
       table: "stops"; 
       file: "gtfs.sqlite"; 
